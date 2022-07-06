@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { UserContext } from "../../contexts/User.context";
+
 import {
   signInWithGooglePopup,
   createUserDocumentFromAuth,
-  signInAuthUserWithEmailAndPassword
+  signInAuthUserWithEmailAndPassword,
 } from "../../Utils/Firebase";
 import FormInput from "../form-input/FormInput";
 import Button from "../Button/Button";
@@ -17,6 +19,8 @@ function SignInForm() {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
 
+  const { setCurrentUser } = useContext(UserContext);
+
   const resetFormFields = () => {
     setFormFields(defaultFormFields);
   };
@@ -30,19 +34,22 @@ function SignInForm() {
     ev.preventDefault();
 
     try {
-      const response = await signInAuthUserWithEmailAndPassword(email, password);
-      console.log(response);
+      const { user } = await signInAuthUserWithEmailAndPassword(
+        email,
+        password
+      );
+      setCurrentUser(user);
       resetFormFields();
     } catch (err) {
-      switch (err.code){
-        case 'auth/wrong-password':
-          alert('Incorrect password for email')
+      switch (err.code) {
+        case "auth/wrong-password":
+          alert("Incorrect password for email");
           break;
-        case 'auth/user-not-found':
-          alert('No user associated with this email')
+        case "auth/user-not-found":
+          alert("No user associated with this email");
           break;
         default:
-          alert(err)
+          alert(err);
       }
     }
   };
@@ -77,7 +84,9 @@ function SignInForm() {
         />
         <div className="buttons-container">
           <Button type="submit">Sign In</Button>
-          <Button type="button" buttonType="google" onClick={signInWithGoogle}>Google Sign In</Button>
+          <Button type="button" buttonType="google" onClick={signInWithGoogle}>
+            Google Sign In
+          </Button>
         </div>
       </form>
     </div>
